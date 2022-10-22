@@ -1,0 +1,1 @@
+2022-10-22 20:33:45,836 [main.py:44] INFO: Arguments: Namespace(dataset='inputs\\ibm-2021.txt', min_conf=0.05, min_sup=0.02)

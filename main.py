@@ -42,7 +42,7 @@ def main():
     # Parse command line arguments
     a = args.parse_args()
     l.info(f"Arguments: {a}")
-
+    
     # Load dataset, the below io handles ibm dataset
     input_data: List[List[str]] = utils.read_file(config.IN_DIR / a.dataset)
     filename = Path(a.dataset).stem
