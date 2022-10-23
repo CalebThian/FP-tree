@@ -4,18 +4,22 @@ def apriori_gen(L,minsup,k):
     Lk = dict()
     keys = list(L.keys())
     keys.sort()
-    
     sel_win = []
     for i in range(k):
         sel_win.append(0)
-    print(sel_win)
+
     while True:
-        sel_win = sw_inc(sel_win,len(keys))
-        print(sel_win)
+        sel_win = sw_inc(sel_win,len(keys)-1)
         if sel_win==-1:
-            return
-    C = Lk.keys()
-    
+            break
+        newkey = ""
+        for i in range(k):
+            print(sel_win[i])
+            newkey += str(keys[sel_win[i]])
+            newkey += " "
+        Lk[newkey] = 0
+    C = list(Lk.keys())
+    print(C)
     # Scan itemset
 
 def sw_inc(sel_win,maximum): #sel_win increment, maximum is the maximum number it can have
@@ -70,5 +74,5 @@ def apriori(input_data, a):
     L = generate_L1(minsup)
     for k,v in L.items():
         print(k,v)
-    apriori_gen(L,minsup,3)
+    apriori_gen(L,minsup,2)
     
