@@ -36,7 +36,7 @@ import config
 import args
 
 # TODO: you have to implement this module by yourself
-# import my_cool_algorithms
+import my_cool_algorithms
 
 def main():
     # Parse command line arguments
@@ -46,9 +46,12 @@ def main():
     # Load dataset, the below io handles ibm dataset
     input_data: List[List[str]] = utils.read_file(config.IN_DIR / a.dataset)
     filename = Path(a.dataset).stem
-
+    print(a.min_sup)
+    print(filename)
+    #print(input_data)
+    
     # # TODO: you have to implement this function by yourself
-    # apriori_out = my_cool_algorithms.apriori(input_data, a)
+    apriori_out = my_cool_algorithms.apriori(input_data, a)
     # # Write output to file
     # utils.write_file(
     #     data=apriori_out,
