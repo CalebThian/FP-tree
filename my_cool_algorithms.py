@@ -1,11 +1,11 @@
 itemset = dict()
 
-def apriori_gen(L,minsup,k):
+def generate_L(L,minsup,k):
     global itemset
     Lk = dict()
     keys = list(L.keys())
     keys.sort()
-    newkeys = subset(keys,k)
+    newkeys = apriori_gen(L,minsup)
     for newkey in newkeys:
         Lk[newkey] = 0
     Ck = list(Lk.keys())
@@ -49,12 +49,49 @@ def subset(items,k):
         subsets.append(subset)
     return subsets
     
+def apriori_gen(L,minsup):
+    keys = list(L.keys())
+    newkeys = []
+    for i in range(len(keys)):
+        for j in range(i+1,len(keys)):
+            s1 = set(str2numbers(keys[i]))
+            s2 = set(str2numbers(keys[j]))
+            if len(s1 & s2) == len(s1)-1:
+                D = [s1 - s2,s2 - s1]
+                B = s1 & s2
+                Bs = []
+                for b in B:
+                    Bs.append(B-b)
+                AddKey = True
+                for bs in Bs:
+                    if AddKey == False:
+                        break
+                    for d in D:
+                        checkComb = list(bs|d)
+                        newkey = list2str(checkCom)
+                        if newkey not in keys:
+                            AddKey = False
+                            break
+                if AddKey:
+                    newkeys.append(list2str(list(s1|s2)))
+    return newkeys
+                    
+def list2str(List):
+    s = ""
+    for i in range(len(List)):
+        if i != 0:
+            s += " "
+        s += str(List[i])
+    return s
 
 def str2numbers(s):
-    strs = s.split()
-    numbers = []
-    for n in numbers:
-        numbers.append(int(n))
+    if isinstance(s, str):
+        strs = s.split()
+        numbers = []
+        for n in numbers:
+            numbers.append(int(n))
+    elif isinstance(s,int):
+        numbers = [s]
     return numbers
     
 def generate_L1(minsup):   
@@ -98,9 +135,14 @@ def prune(itemset,minsup):
 def apriori(input_data, a):
     generate_itemset(input_data)
     minsup = int(a.min_sup*len(itemset.keys()))
-    L = generate_L1(minsup)
-    for k,v in L.items():
+    L1 = generate_L1(minsup)
+    for k,v in L1.items():
         print(k,v)
-    L2 = apriori_gen(L,minsup,2)
-    for k,v in L2.items():
-        print(k,v)
+    Lk = [L1]
+    L = L1
+    while True:
+        L = generate_L(L,minsup,len(Lk)+1)
+        if len(L) == 0:
+            break
+        Lk.append(L)
+    print(Lk)
