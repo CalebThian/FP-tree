@@ -62,14 +62,15 @@ def apriori_gen(L,minsup):
                 print(f"Checking {list2str(list(s1|s2))}")
                 
                 # Check prune or not
-                D = [s1 - s2,s2 - s1]
+                D = (s1 - s2)|(s2 - s1)
                 B = s1 & s2
                 Bs = []
+                print(f"B={B}")
                 if len(B) != 1:
                     for b in B:
                         Bs.append(B-{b})
                 else:
-                    Bs = [D[0] | D[1]]
+                    Bs = [D]
                 AddKey = True
                 
                 print(f"Base:{Bs}")
@@ -82,12 +83,11 @@ def apriori_gen(L,minsup):
                     for bs in Bs:
                         if AddKey == False:
                             break
-                        for d in D:
-                            checkComb = list(bs|d)
-                            newkey = list2str(checkComb)
-                            if newkey not in keys:
-                                AddKey = False
-                                break
+                        checkComb = list(bs|D)
+                        newkey = list2str(checkComb)
+                        if newkey not in keys:
+                            AddKey = False
+                            break
                     if AddKey:
                         newkeys.append(list2str(list(s1|s2)))
     return newkeys
@@ -157,7 +157,7 @@ def apriori(input_data, a):
                '2':[1,2,4,5],
                '3':[1,4],
                '4':[0,1,2,3]}
-    minsup = 1
+    minsup = 2
     L1 = generate_L1(minsup)
     for k,v in L1.items():
         print(k,v)
