@@ -116,6 +116,22 @@ def str2numbers(s): # Convert str/key to int list
     elif isinstance(s,int):
         numbers = [s]
     return numbers
+
+def set2list(Dict): # Convert set value of a dictionary to list value
+    for k,v in Dict.items():
+        Dict[k] = list(v)
+    return Dict
+
+def set2key(s): #Convert set to key/str
+    # First convert to list
+    s = list(s)
+    s = list2key(s)
+    return s
+
+def key2set(s):#Convert key/str to set
+    s = str2numbers(s)
+    s = set(s)
+    return s
     
 def generate_L1(minsup):   
     L1 = dict()
@@ -139,22 +155,6 @@ def generate_itemset(input_data):
             itemset[Id] = set([item])
             
     itemset = set2list(itemset)
-    
-def set2list(Dict): # Convert set value of a dictionary to list value
-    for k,v in Dict.items():
-        Dict[k] = list(v)
-    return Dict
-
-def set2key(s): #Convert set to key/str
-    # First convert to list
-    s = list(s)
-    s = list2key(s)
-    return s
-
-def key2set(s):#Convert key/str to set
-    s = str2numbers(s)
-    s = set(s)
-    return s
             
 def prune(itemset,minsup):
     delete = []
@@ -377,7 +377,7 @@ def freq_set(fp,table,order):
         # Path addition
         paths = table[item]['prefix_set']
         path_addition(item,paths,fp)
-        
+
 def path_addition(item,paths,fp):
     path = dict()
     for p in paths:
@@ -385,7 +385,22 @@ def path_addition(item,paths,fp):
         p_num.append(item)
         path[p] = get_count_path(p_num,fp)
     print(item,path)
-
+    
+    # Add path counting from its subset
+    ## Sort the paths from longest to shortest
+    p_set = list(map(str2numbers,paths))
+    sorted(p_set,key=len,reverse=True)
+    
+    for i in range(len(p_set)):
+        for j in range(i+1,len(p_set)):
+            p1 = list2str(p_set[i])
+            p2 = list2str(p_set[j])
+            if p2 in p1: #p2 is a sub-path of p1
+                path[p2] += path[p1]
+    print("After combining")
+    print(item,path)
+    print()
+    
 def get_count_path(p_num,fp):
     for root in fp:
         if root['item'] == p_num[0]:
