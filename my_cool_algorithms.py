@@ -351,7 +351,7 @@ def dfs(item,tree,prefix,freq_table):
     for node in tree:
         if item[0] == node['item']:
             node['count'] += 1
-            dfs(item[1:],node['fnode'],next_prefix)
+            dfs(item[1:],node['fnode'],next_prefix,freq_table)
             return
     # Create new node
     Node = {'item':item[0],
@@ -361,15 +361,15 @@ def dfs(item,tree,prefix,freq_table):
     }
     
     # Only add prefix when node is first created
-    if item[0] in table.keys():
-        table[item[0]]['count'] += 1
-        table[item[0]]['prefix_set'].add(prefix)
+    if item[0] in freq_table.keys():
+        freq_table[item[0]]['count'] += 1
+        freq_table[item[0]]['prefix_set'].add(prefix)
     else:
-        table[item[0]] ={'count': 0,
+        freq_table[item[0]] ={'count': 1,
                          'prefix_set':{prefix}}
     tree.append(Node)
     
-    dfs(item[1:],tree[-1]['fnode'],next_prefix)
+    dfs(item[1:],tree[-1]['fnode'],next_prefix,freq_table)
     
 def cons_FP():
     global itemset
@@ -378,6 +378,7 @@ def cons_FP():
     for Id,items in itemset.items():
         dfs(items,fp,"",freq_table)
     print(fp)
+    print(freq_table)
     
     
     
