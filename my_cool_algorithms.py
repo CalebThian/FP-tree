@@ -151,6 +151,11 @@ def set2key(s): #Convert set to key/str
     s = list(s)
     s = list2key(s)
     return s
+
+def key2set(s):#Convert key/str to set
+    s = str2numbers(s)
+    s = set(s)
+    return s
             
 def prune(itemset,minsup):
     delete = []
@@ -174,12 +179,9 @@ def cal_conf(rule,L):
     s1 = set(str2numbers(rule[0]))
     s2 = set(str2numbers(rule[1]))
     s = s1 | s2
-    print(s)
     s_list = list(s)
     s_list.sort()
     key = list2str(s_list)
-    print(key)
-    print(len(L),len(s)-1,len(s1)-1)
     num = L[len(s)-1][key]
     den = L[len(s1)-1][rule[0]]
     return float(num/den)
@@ -188,10 +190,15 @@ def gen_rule(Lk,min_conf):
     Rules = []
     for i in range(len(Lk)-1,0,-1): # Ignore L1 as it cannot form a rule
         for k,v in Lk[i].items():
+            # Generate the first layer of rule
             rules = gen_r1(k)
             print(rules)
-            break
+            
             #Prune rule less than min_conf
+            rules = prune_rule(rules,min_conf,Lk)
+            
+            # Generate rule by merging 2 rules
+            newrules = gen_r(rules)
             
 def gen_r1(k):
     Rules = []
@@ -202,6 +209,37 @@ def gen_r1(k):
         Rules.append([lhs,rhs])
     return Rules
 
+def prune_rule(rules,min_conf,Lk):
+    remove_rule = []
+    for r in rules:
+        conf = cal_conf(r,Lk)
+        print(f"conf for {r} = {conf}")
+        if conf<min_conf:
+            remove_rule.append(r)
+    print(f"Prune {len(remove_rule)} rule")
+    for r_rule in remove_rule:
+        rules.remove(r_rule)
+    return rules
+
+def gen_r(rules):
+    new_rules = []
+    for i in range(len(rules)):
+        for j in range(i,len(rules)):
+            lhs1 = key2set(rules[i][0])
+            lhs2 = key2set(rules[j][0])
+            rhs1 = key2set(rules[i][1])
+            rhs2 = key2set(rules[j][1])
+            
+            if len(lhs1 & lhs2) == len(lhs1)-1 and len(lhs1 & lhs2) != 0:
+                new_lhs = lhs1 & lhs2
+                new_rhs = rhs1 | rhs2
+                new_rule = [set2key(new_lhs),set2key(new_rhs)]
+                if new_rule in new_rules:
+                    break
+                new_rules.append(new_rule)
+    print(f"new rules generated:{new_rules}")
+    return new_rules
+
 def apriori(input_data, a):
     global itemset
     generate_itemset(input_data)
@@ -210,7 +248,7 @@ def apriori(input_data, a):
     
     itemset = {'1':[0,3,1,2],
                '2':[1,2,4,5],
-               '3':[4],
+               '3':[0,1,4],
                '4':[0,1,2,3]}
     minsup = 2
     sort_itemset()
@@ -224,6 +262,6 @@ def apriori(input_data, a):
             break
         Lk.append(L)
     print(Lk)
-    min_conf = 0.5#a.min_conf
+    min_conf = 0.7#a.min_conf
     gen_rule(Lk,min_conf)
     
