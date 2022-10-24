@@ -9,6 +9,7 @@ def generate_L(L,minsup,k):
     keys = list(L.keys())
     keys.sort()
     newkeys = apriori_gen(L,minsup)
+    print(f"newkeys:{newkeys}")
     for newkey in newkeys:
         Lk[newkey] = 0
     Ck = list(Lk.keys())
@@ -44,12 +45,12 @@ def subset(items,k):
         sel_win = sw_inc(sel_win,len(items)-1)
         if sel_win==-1:
             break
-        subset = ""
+        subset = []
         for i in range(k):
-            if i!=0:
-                subset += " "
-            subset += str(items[sel_win[i]])
-        subsets.append(subset)
+            subset.append(items[sel_win[i]])
+        subset.sort()
+        key = list2key(subset)
+        subsets.append(key)
     return subsets
     
 def apriori_gen(L,minsup):
@@ -70,25 +71,35 @@ def apriori_gen(L,minsup):
                 else:
                     Bs = [D]
                 AddKey = True
-                
+                newkey = list2key(list(s1|s2))
+                #print(f"B:{B}, Base:{Bs}")
                 if len(Bs) == 0: # For generate L2
-                    newkeys.append(list2str(list(s1|s2)))
+                    newkeys.append(newkey)
+                    print(f"newkeys to append {newkey}")
                 elif len(Bs) == 1: # For generate L3
-                    if list2str(list(Bs[0])) in keys:
-                        newkeys.append(list2str(list(s1|s2)))
+                    checkkey = list2key(list(Bs[0]))
+                    print(f"Checkkey:{checkkey}")
+                    if checkkey in keys:
+                        newkeys.append(newkey)
                 else: # For generate Lk>3
                     for bs in Bs:
                         if AddKey == False:
                             break
-                        checkComb = list(bs|D)
-                        newkey = list2str(checkComb)
-                        if newkey not in keys:
+                        checkkey = list2key(list(bs|D))
+                        if checkkey not in keys:
                             AddKey = False
                             break
                     if AddKey:
-                        newkeys.append(list2str(list(s1|s2)))
+                        newkeys.append(newkey)
     return newkeys
-                    
+
+def list2key(List):
+    print(f"{List} to key: ",end="")
+    List.sort()
+    key = list2str(List)
+    print(key)
+    return key
+
 def list2str(List):
     s = ""
     for i in range(len(List)):
@@ -138,6 +149,7 @@ def set2list(Dict):
 def prune(itemset,minsup):
     delete = []
     for k,v in itemset.items():
+        print(f"{k}:{v}")
         if v<minsup:
             delete.append(k)
     print(f"Prune {len(delete)} itemset")
@@ -176,6 +188,7 @@ def apriori(input_data, a):
     L1 = generate_L1(minsup)
     Lk = [L1]
     L = L1
+    print(L1)
     while True:
         L = generate_L(L,minsup,len(Lk)+1)
         if len(L) == 0:
