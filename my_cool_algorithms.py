@@ -156,18 +156,19 @@ def generate_itemset(input_data):
             
     itemset = set2list(itemset)
             
-def prune(itemset,minsup):
+def prune(L,minsup):
     delete = []
+    global itemset
     T = len(itemset.keys())
-    for k,v in itemset.items():
+    for k,v in L.items():
         #print(f"{k}:{v}")
         sup = float(v/T)
         if sup<minsup:
             delete.append(k)
-    print(f"Prune {len(delete)} itemset")
+    print(f"Prune {len(delete)} item")
     for d in delete:
-        del itemset[d]
-    return itemset
+        del L[d]
+    return L
 
 def sort_itemset():
     global itemset
@@ -329,8 +330,26 @@ def fp_growth(input_data,a):
     sort_itemset()
     
     # Construct FP-Tree with L1
-    cons_FP()
+    cons_FP(minsup)
     
+def cons_FP(minsup):
+    global itemset
+    fp = []
+    freq_table = dict()
+    for Id,items in itemset.items():
+        dfs(items,fp,"",freq_table)
+    print(fp)
+    print(freq_table)
+    
+    # Find the order of object
+    order = dict()
+    for item,info in freq_table.items():
+        order[item] = info['count']
+    order = dict(sorted(order.items(), key=lambda item: item[1]))
+    print(order.keys())
+    
+    # Find frequent set
+    freq_set(fp,freq_table,order,minsup)
 # FP-tree data structure:
 ## Tree: List[Dict]
 ## Node: Dict with 4 keys: item:(int);count:(int);prefix = 'x1 x2 x3';fnode:(List[Node])/(Tree)
@@ -372,13 +391,13 @@ def dfs(item,tree,prefix,freq_table):
     
     dfs(item[1:],tree[-1]['fnode'],next_prefix,freq_table)
     
-def freq_set(fp,table,order):
+def freq_set(fp,table,order,minsup):
     for item in order:
         # Path addition
         paths = table[item]['prefix_set']
-        path_addition(item,paths,fp)
+        path_addition(item,paths,fp,minsup)
 
-def path_addition(item,paths,fp):
+def path_addition(item,paths,fp,minsup):
     path = dict()
     for p in paths:
         p_num = str2numbers(p)
@@ -399,8 +418,21 @@ def path_addition(item,paths,fp):
                 path[p2] += path[p1]
     print("After combining")
     print(item,path)
-    print()
-    
+
+    path = prune_path(path,minsup)
+def prune_path(path,minsup):
+    global itemset
+    T = len(itemset)
+    del_list = []
+    for p,v in path.items():
+        sup = float(v/T)
+        if sup<minsup:
+            del_list.append(p)
+    print(f"Prune {len(del_list)} paths")
+    for d in del_list:
+        del path[d]
+    return path
+            
 def get_count_path(p_num,fp):
     for root in fp:
         if root['item'] == p_num[0]:
@@ -416,23 +448,6 @@ def get_count_path(p_num,fp):
                 break
             
     
-def cons_FP():
-    global itemset
-    fp = []
-    freq_table = dict()
-    for Id,items in itemset.items():
-        dfs(items,fp,"",freq_table)
-    print(fp)
-    print(freq_table)
-    
-    # Find the order of object
-    order = dict()
-    for item,info in freq_table.items():
-        order[item] = info['count']
-    order = dict(sorted(order.items(), key=lambda item: item[1]))
-    print(order.keys())
-    
-    # Find frequent set
-    freq_set(fp,freq_table,order)
+
     
     
