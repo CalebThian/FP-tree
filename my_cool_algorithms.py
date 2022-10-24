@@ -93,14 +93,14 @@ def apriori_gen(L,minsup):
                         newkeys.append(newkey)
     return newkeys
 
-def list2key(List):
+def list2key(List): # Same as list2str, but include sort
     #print(f"{List} to key: ",end="")
     List.sort()
     key = list2str(List)
     #print(key)
     return key
 
-def list2str(List):
+def list2str(List): # Convert list of int to str
     s = ""
     for i in range(len(List)):
         if i != 0:
@@ -108,7 +108,7 @@ def list2str(List):
         s += str(List[i])
     return s
 
-def str2numbers(s):
+def str2numbers(s): # Convert str/key to int list
     if isinstance(s, str):
         strs = s.split()
         numbers = []
@@ -141,10 +141,16 @@ def generate_itemset(input_data):
             
     itemset = set2list(itemset)
     
-def set2list(Dict):
+def set2list(Dict): # Convert set value of a dictionary to list value
     for k,v in Dict.items():
         Dict[k] = list(v)
     return Dict
+
+def set2key(s): #Convert set to key/str
+    # First convert to list
+    s = list(s)
+    s = list2key(s)
+    return s
             
 def prune(itemset,minsup):
     delete = []
@@ -178,6 +184,23 @@ def cal_conf(rule,L):
     den = L[len(s1)-1][rule[0]]
     return float(num/den)
 
+def gen_rule(Lk,min_conf):
+    Rules = []
+    for i in range(len(Lk)-1,0,-1): # Ignore L1 as it cannot form a rule
+        for k,v in Lk[i].items():
+            rules = gen_r1(k)
+            print(rules)
+            break
+            #Prune rule less than min_conf
+            
+def gen_r1(k):
+    Rules = []
+    nums = set(str2numbers(k))
+    for num in nums:
+        lhs = set2key(nums-{num})
+        rhs = list2key([num])
+        Rules.append([lhs,rhs])
+    return Rules
 
 def apriori(input_data, a):
     global itemset
@@ -187,7 +210,7 @@ def apriori(input_data, a):
     
     itemset = {'1':[0,3,1,2],
                '2':[1,2,4,5],
-               '3':[1,4],
+               '3':[4],
                '4':[0,1,2,3]}
     minsup = 2
     sort_itemset()
@@ -201,8 +224,6 @@ def apriori(input_data, a):
             break
         Lk.append(L)
     print(Lk)
-    mincof = 0.05
-    rule1 = ["1","0 2"]
-    print(cal_conf(rule1,Lk))
-    
+    min_conf = 0.5#a.min_conf
+    gen_rule(Lk,min_conf)
     
