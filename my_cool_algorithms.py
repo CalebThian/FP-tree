@@ -352,6 +352,7 @@ def dfs(item,tree,prefix,freq_table):
         if item[0] == node['item']:
             node['count'] += 1
             dfs(item[1:],node['fnode'],next_prefix,freq_table)
+            freq_table[item[0]]['count'] += 1
             return
     # Create new node
     Node = {'item':item[0],
@@ -380,5 +381,13 @@ def cons_FP():
     print(fp)
     print(freq_table)
     
+    # Find the order of object
+    order = dict()
+    for item,info in freq_table.items():
+        order[item] = info['count']
+    
+    print(order)
+    order = dict(sorted(order.items(), key=lambda item: item[1]))
+    print(order)
     
     
