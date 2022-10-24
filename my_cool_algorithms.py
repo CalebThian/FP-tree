@@ -117,6 +117,12 @@ def str2numbers(s): # Convert str/key to int list
         numbers = [s]
     return numbers
 
+
+def key2set(s):#Convert key/str to set
+    s = str2numbers(s)
+    s = set(s)
+    return s
+
 def set2list(Dict): # Convert set value of a dictionary to list value
     for k,v in Dict.items():
         Dict[k] = list(v)
@@ -128,11 +134,6 @@ def set2key(s): #Convert set to key/str
     s = list2key(s)
     return s
 
-def key2set(s):#Convert key/str to set
-    s = str2numbers(s)
-    s = set(s)
-    return s
-    
 def generate_L1(minsup):   
     L1 = dict()
     for Id,items in itemset.items():
@@ -321,16 +322,28 @@ def fp_growth(input_data,a):
     minsup = a.min_sup
     min_conf = a.min_conf
     
-    itemset = {'1':[0,3,1,2],
-               '2':[1,2,5],
-               '3':[1,4],
-               '4':[0,1,2,3]}
-    minsup = 2
+    itemset = {'1':[0,1,2],
+               '2':[0,3],
+               '3':[0,4],
+               '4':[0,1,3],
+               '5':[1,4],
+               '6':[0,4],
+               '7':[1,4],
+               '8':[0,1,4,2],
+               '9':[0,1,4]}
+    minsup = 2./9.
     min_conf = 0.7#a.min_conf
     sort_itemset()
     
     # Construct FP-Tree with L1
-    cons_FP(minsup)
+    fp,freq_table = cons_FP(minsup)
+    
+    # Find the order of obect
+    order_key = get_order(freq_table)
+    
+    # Find frequent set
+    patterns = freq_set(fp,freq_table,order_key,minsup)
+    print(patterns)
     
 def cons_FP(minsup):
     global itemset
@@ -340,16 +353,16 @@ def cons_FP(minsup):
         dfs(items,fp,"",freq_table)
     print(fp)
     print(freq_table)
+    return fp,freq_table
     
-    # Find the order of object
+def get_order(freq_table):
     order = dict()
     for item,info in freq_table.items():
         order[item] = info['count']
     order = dict(sorted(order.items(), key=lambda item: item[1]))
-    print(order.keys())
-    
-    # Find frequent set
-    freq_set(fp,freq_table,order,minsup)
+    return order.keys()
+
+
 # FP-tree data structure:
 ## Tree: List[Dict]
 ## Node: Dict with 4 keys: item:(int);count:(int);prefix = 'x1 x2 x3';fnode:(List[Node])/(Tree)
@@ -392,11 +405,29 @@ def dfs(item,tree,prefix,freq_table):
     dfs(item[1:],tree[-1]['fnode'],next_prefix,freq_table)
     
 def freq_set(fp,table,order,minsup):
+    freq_pats = []
     for item in order:
         # Path addition
         paths = table[item]['prefix_set']
-        path_addition(item,paths,fp,minsup)
+        paths = path_addition(item,paths,fp,minsup)
+        freq_pats.append(gen_path(item,paths))
+    
+    # Merge all the frequent patterns
+    patterns = dict()
+    for pat_dict in freq_pats:
+        for k,v in pat_dict.items():
+            patterns[k]=v
+    return patterns
 
+def gen_path(item,paths):
+    pats = dict()
+    for p,v in paths.items():
+        pat = str2numbers(p)
+        pat.append(item)
+        pat = list2key(pat)
+        pats[pat] = v
+    return pats
+        
 def path_addition(item,paths,fp,minsup):
     path = dict()
     for p in paths:
@@ -416,10 +447,10 @@ def path_addition(item,paths,fp,minsup):
             p2 = list2str(p_set[j])
             if p2 in p1: #p2 is a sub-path of p1
                 path[p2] += path[p1]
-    print("After combining")
-    print(item,path)
 
     path = prune_path(path,minsup)
+    return path
+    
 def prune_path(path,minsup):
     global itemset
     T = len(itemset)
@@ -427,6 +458,8 @@ def prune_path(path,minsup):
     for p,v in path.items():
         sup = float(v/T)
         if sup<minsup:
+            del_list.append(p)
+        elif len(p)==0:
             del_list.append(p)
     print(f"Prune {len(del_list)} paths")
     for d in del_list:
