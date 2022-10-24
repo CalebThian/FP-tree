@@ -245,7 +245,7 @@ def prune_rule(rules,min_conf,Lk):
     remove_rule = []
     for r in rules:
         conf = cal_conf(r,Lk)
-        print(f"conf for {r} = {conf}")
+        #print(f"conf for {r} = {conf}")
         if conf<min_conf:
             remove_rule.append(r)
     print(f"Prune {len(remove_rule)} rule")
@@ -299,10 +299,18 @@ def apriori(input_data, a):
     print(Lk)
     
     Rules = gen_rule(Lk,min_conf)
+    rule_data = []
     print("In apriori:")
     for r in Rules:
-        print(f"{r[0]}->{r[1]}, sup = {cal_sup(r,Lk)},conf = {cal_conf(r,Lk)}")
-    
+        ant = key2set(r[0])
+        con = key2set(r[1])
+        sup = cal_sup(r,Lk)
+        conf = cal_conf(r,Lk)
+        print(f"{ant}->{con}, sup = {sup},conf = {conf}")
+        sup = round(sup, 3)
+        conf = round(conf, 3)
+        rule_data.append([ant,con,sup,conf])    
+    return rule_data
 # FP tree
 
 
