@@ -372,6 +372,35 @@ def dfs(item,tree,prefix,freq_table):
     
     dfs(item[1:],tree[-1]['fnode'],next_prefix,freq_table)
     
+def freq_set(fp,table,order):
+    for item in order:
+        # Path addition
+        paths = table[item]['prefix_set']
+        path_addition(item,paths,fp)
+        
+def path_addition(item,paths,fp):
+    path = dict()
+    for p in paths:
+        p_num = str2numbers(p)
+        p_num.append(item)
+        path[p] = get_count_path(p_num,fp)
+    print(item,path)
+
+def get_count_path(p_num,fp):
+    for root in fp:
+        if root['item'] == p_num[0]:
+            tree = root
+    i = 1
+    while True:
+        if i>=len(p_num):
+            return tree['count']
+        for node in tree['fnode']:
+            if node['item'] == p_num[i]:
+                tree = node
+                i+=1
+                break
+            
+    
 def cons_FP():
     global itemset
     fp = []
@@ -385,9 +414,10 @@ def cons_FP():
     order = dict()
     for item,info in freq_table.items():
         order[item] = info['count']
-    
-    print(order)
     order = dict(sorted(order.items(), key=lambda item: item[1]))
-    print(order)
+    print(order.keys())
+    
+    # Find frequent set
+    freq_set(fp,freq_table,order)
     
     
