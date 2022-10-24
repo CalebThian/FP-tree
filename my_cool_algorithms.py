@@ -186,6 +186,18 @@ def cal_conf(rule,L):
     den = L[len(s1)-1][rule[0]]
     return float(num/den)
 
+def cal_sup(rule,L):
+    global itemset
+    s1 = set(str2numbers(rule[0]))
+    s2 = set(str2numbers(rule[1]))
+    s = s1 | s2
+    s_list = list(s)
+    s_list.sort()
+    key = list2str(s_list)
+    num = L[len(s1)-1][rule[0]]
+    den = len(itemset.keys())
+    return float(num/den)
+
 def gen_rule(Lk,min_conf):
     Rules = []
     for i in range(len(Lk)-1,0,-1): # Ignore L1 as it cannot form a rule
@@ -198,7 +210,20 @@ def gen_rule(Lk,min_conf):
             rules = prune_rule(rules,min_conf,Lk)
             
             # Generate rule by merging 2 rules
-            newrules = gen_r(rules)
+            
+            while True:
+                Rules.append(rules)
+                newrules = gen_r(rules)
+                #Prune new rules
+                rules = prune_rule(newrules,min_conf,Lk)
+                
+                if len(rules)== 0:
+                    break
+    for k,rules in enumerate(Rules):
+        print(f"Rule with {k+1} element on left")
+        for r in rules:
+            print(f"{r[0]}->{r[1]}, sup = {cal_sup(r,Lk)},conf = {cal_conf(r,Lk)}")
+    return Rules
             
 def gen_r1(k):
     Rules = []
@@ -247,8 +272,8 @@ def apriori(input_data, a):
     minsup = int(a.min_sup*len(itemset.keys()))
     
     itemset = {'1':[0,3,1,2],
-               '2':[1,2,4,5],
-               '3':[0,1,4],
+               '2':[1,2,5],
+               '3':[1,4],
                '4':[0,1,2,3]}
     minsup = 2
     sort_itemset()
