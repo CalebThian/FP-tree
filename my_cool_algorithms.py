@@ -337,9 +337,9 @@ def fp_growth(input_data,a):
 ## Leaf: Dict with 4 keys: item:(int);count:(int);prefix = 'x1 x2 x3';fnode:null
 
 # Frequency table
-## Table: List[Item]
-## Item: Dict with 2 keys: item:(int);prefix_list: ['x1 x2 x3','y1 y2 y3 ...']
-def dfs(item,tree,prefix):
+## Table: Dict with 1 key: item->Info
+## Info: Dict with 2 keys: count->(int);prefix_set->{'x1 x2 x3','y1 y2 y3 ...'}
+def dfs(item,tree,prefix,freq_table):
     if len(item)==0:
         return
     
@@ -359,6 +359,14 @@ def dfs(item,tree,prefix):
             'prefix':prefix,
             'fnode':[]
     }
+    
+    # Only add prefix when node is first created
+    if item[0] in table.keys():
+        table[item[0]]['count'] += 1
+        table[item[0]]['prefix_set'].add(prefix)
+    else:
+        table[item[0]] ={'count': 0,
+                         'prefix_set':{prefix}}
     tree.append(Node)
     
     dfs(item[1:],tree[-1]['fnode'],next_prefix)
@@ -366,8 +374,9 @@ def dfs(item,tree,prefix):
 def cons_FP():
     global itemset
     fp = []
+    freq_table = dict()
     for Id,items in itemset.items():
-        dfs(items,fp,"")
+        dfs(items,fp,"",freq_table)
     print(fp)
     
     
