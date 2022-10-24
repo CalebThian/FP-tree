@@ -331,7 +331,7 @@ def fp_growth(input_data,a):
                '7':[1,4],
                '8':[0,1,4,2],
                '9':[0,1,4]}
-    minsup = 2./9.
+    minsup = 2./9.-0.001
     min_conf = 0.7#a.min_conf
     sort_itemset()
     
@@ -429,6 +429,9 @@ def gen_path(item,paths):
     return pats
         
 def path_addition(item,paths,fp,minsup):
+    global itemset
+    T = len(itemset)
+    
     path = dict()
     for p in paths:
         p_num = str2numbers(p)
@@ -439,17 +442,65 @@ def path_addition(item,paths,fp,minsup):
     # Add path counting from its subset
     ## Sort the paths from longest to shortest
     p_set = list(map(str2numbers,paths))
-    sorted(p_set,key=len,reverse=True)
-    
+    p_set = sorted(p_set,key=len,reverse=True)
+
     for i in range(len(p_set)):
         for j in range(i+1,len(p_set)):
             p1 = list2str(p_set[i])
             p2 = list2str(p_set[j])
             if p2 in p1: #p2 is a sub-path of p1
                 path[p2] += path[p1]
-
+                # If longer path will be pruned, perform addition once, else perform on all
+                if float(path[p1]/T)<minsup:
+                    break
+    # Prune path
     path = prune_path(path,minsup)
+    
+    # Generate sub-path
+    cur_path = path.keys()
+    Subpaths = dict()
+    for p,count in path.items():
+        subpaths = gen_subpath(p)
+        for subpath in subpaths:
+            if subpath not in cur_path:
+                Subpaths[subpath] = count
+                print(f"{p} generates {subpath}")
+    for subpath,count in Subpaths.items():
+        path[subpath] = count
     return path
+
+def gen_subpath(path):
+    path = str2numbers(path)
+    path.sort()
+    
+    # Use binary window:
+    bin_win = []
+    for i in range(len(path)):
+        bin_win.append(0)
+        
+    paths = []
+    while True:
+        bin_win = bin_inc(bin_win)
+        if bin_win == -1:
+            break
+        else:
+            p_temp = []
+            for i in range(len(bin_win)):
+                if bin_win[i]==1:
+                    p_temp.append(path[i])
+            paths.append(list2key(p_temp))
+    return paths
+        
+def bin_inc(bin_win):
+    for i in range(len(bin_win)-1,-1,-1):
+        if bin_win[i] == 0:
+            bin_win[i] = 1
+            break
+        elif bin_win[i] == 1:
+            bin_win[i] = 0
+            if i == 0:
+                return -1
+    return bin_win
     
 def prune_path(path,minsup):
     global itemset
