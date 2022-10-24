@@ -311,7 +311,54 @@ def apriori(input_data, a):
         conf = round(conf, 3)
         rule_data.append([ant,con,sup,conf])    
     return rule_data
+
+
 # FP tree
-
-
+def fp_growth(input_data,a):
+    global itemset
+    generate_itemset(input_data)
+    minsup = a.min_sup
+    min_conf = a.min_conf
+    
+    itemset = {'1':[0,3,1,2],
+               '2':[1,2,5],
+               '3':[1,4],
+               '4':[0,1,2,3]}
+    minsup = 2
+    min_conf = 0.7#a.min_conf
+    sort_itemset()
+    
+    # Construct FP-Tree with L1
+    cons_FP()
+    
+# FP-tree data structure:
+## Tree: List[Dict]
+## Node: Dict with 3 keys: item:(int);count:(int);fnode:(List[Node])/(Tree)
+## Leaf: Dict with 3 keys: item:(int);count:(int);fnode:null
+def dfs(item,tree):
+    if len(item)==0:
+        return
+    
+    for node in tree:
+        if item[0] == node['item']:
+            node['count'] += 1
+            dfs(item[1:],node['fnode'])
+            return
+    # Create new node
+    Node = {'item':item[0],
+            'count':1,
+            'fnode':[]
+    }
+    tree.append(Node)
+    
+    dfs(item[1:],tree[-1]['fnode'])
+    
+def cons_FP():
+    global itemset
+    fp = []
+    for Id,items in itemset.items():
+        dfs(items,fp)
+    print(fp)
+    
+    
     
