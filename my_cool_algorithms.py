@@ -2,6 +2,7 @@ itemset = dict()
 
 def generate_L(L,minsup,k):
     global itemset
+    print(f"Generating L{k}")
     Lk = dict()
     keys = list(L.keys())
     keys.sort()
@@ -52,28 +53,43 @@ def subset(items,k):
 def apriori_gen(L,minsup):
     keys = list(L.keys())
     newkeys = []
+    print(keys)
     for i in range(len(keys)):
         for j in range(i+1,len(keys)):
             s1 = set(str2numbers(keys[i]))
             s2 = set(str2numbers(keys[j]))
             if len(s1 & s2) == len(s1)-1:
+                print(f"Checking {list2str(list(s1|s2))}")
+                
+                # Check prune or not
                 D = [s1 - s2,s2 - s1]
                 B = s1 & s2
                 Bs = []
-                for b in B:
-                    Bs.append(B-b)
+                if len(B) != 1:
+                    for b in B:
+                        Bs.append(B-{b})
+                else:
+                    Bs = [D[0] | D[1]]
                 AddKey = True
-                for bs in Bs:
-                    if AddKey == False:
-                        break
-                    for d in D:
-                        checkComb = list(bs|d)
-                        newkey = list2str(checkCom)
-                        if newkey not in keys:
-                            AddKey = False
-                            break
-                if AddKey:
+                
+                print(f"Base:{Bs}")
+                if len(Bs) == 0: #For generate L2
                     newkeys.append(list2str(list(s1|s2)))
+                elif len(Bs) == 1: #For generate L3
+                    if list2str(list(Bs[0])) in keys:
+                        newkeys.append(list2str(list(s1|s2)))
+                else: 
+                    for bs in Bs:
+                        if AddKey == False:
+                            break
+                        for d in D:
+                            checkComb = list(bs|d)
+                            newkey = list2str(checkComb)
+                            if newkey not in keys:
+                                AddKey = False
+                                break
+                    if AddKey:
+                        newkeys.append(list2str(list(s1|s2)))
     return newkeys
                     
 def list2str(List):
@@ -88,7 +104,7 @@ def str2numbers(s):
     if isinstance(s, str):
         strs = s.split()
         numbers = []
-        for n in numbers:
+        for n in strs:
             numbers.append(int(n))
     elif isinstance(s,int):
         numbers = [s]
@@ -133,14 +149,22 @@ def prune(itemset,minsup):
     return itemset
               
 def apriori(input_data, a):
+    global itemset
     generate_itemset(input_data)
+    
     minsup = int(a.min_sup*len(itemset.keys()))
+    itemset = {'1':[0,1,2,3],
+               '2':[1,2,4,5],
+               '3':[1,4],
+               '4':[0,1,2,3]}
+    minsup = 1
     L1 = generate_L1(minsup)
     for k,v in L1.items():
         print(k,v)
     Lk = [L1]
     L = L1
     while True:
+        print(len(Lk)+1)
         L = generate_L(L,minsup,len(Lk)+1)
         if len(L) == 0:
             break
