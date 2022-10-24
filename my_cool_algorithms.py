@@ -1,5 +1,7 @@
 itemset = dict()
 
+# Generate Frequent Itemset
+
 def generate_L(L,minsup,k):
     global itemset
     print(f"Generating L{k}")
@@ -11,6 +13,7 @@ def generate_L(L,minsup,k):
         Lk[newkey] = 0
     Ck = list(Lk.keys())
     Ck = set(Ck)
+    
     # Scan itemset
     for Id,items in itemset.items():
         if len(items)<k:
@@ -26,7 +29,6 @@ def sw_inc(sel_win,maximum): #sel_win increment, maximum is the maximum number i
     for i in range(len(sel_win)-1,-1,-1):
         if sel_win[i] != maximum-(len(sel_win)-1-i): # example: [0 3 4] for maximum = 4, next should be [1,2,3] but not [0 4 ?]
             sel_win[i] += 1
-            #print(i,sel_win[i],maximum-(len(sel_win)-1-i))
             for j in range(i+1,len(sel_win)):
                 sel_win[j] = sel_win[j-1]+1
             return sel_win
@@ -53,19 +55,15 @@ def subset(items,k):
 def apriori_gen(L,minsup):
     keys = list(L.keys())
     newkeys = []
-    print(keys)
     for i in range(len(keys)):
         for j in range(i+1,len(keys)):
             s1 = set(str2numbers(keys[i]))
             s2 = set(str2numbers(keys[j]))
-            if len(s1 & s2) == len(s1)-1:
-                print(f"Checking {list2str(list(s1|s2))}")
-                
+            if len(s1 & s2) == len(s1)-1:         
                 # Check prune or not
                 D = (s1 - s2)|(s2 - s1)
                 B = s1 & s2
                 Bs = []
-                print(f"B={B}")
                 if len(B) != 1:
                     for b in B:
                         Bs.append(B-{b})
@@ -73,13 +71,12 @@ def apriori_gen(L,minsup):
                     Bs = [D]
                 AddKey = True
                 
-                print(f"Base:{Bs}")
-                if len(Bs) == 0: #For generate L2
+                if len(Bs) == 0: # For generate L2
                     newkeys.append(list2str(list(s1|s2)))
-                elif len(Bs) == 1: #For generate L3
+                elif len(Bs) == 1: # For generate L3
                     if list2str(list(Bs[0])) in keys:
                         newkeys.append(list2str(list(s1|s2)))
-                else: 
+                else: # For generate Lk>3
                     for bs in Bs:
                         if AddKey == False:
                             break
@@ -114,10 +111,10 @@ def generate_L1(minsup):
     L1 = dict()
     for Id,items in itemset.items():
         for item in items:
-            if item in L1.keys():
-                L1[item] += 1 
+            if str(item) in L1.keys():
+                L1[str(item)] += 1 
             else:
-                L1[item] = 1
+                L1[str(item)] = 1
     L1 = prune(L1,minsup)
     return L1
 
@@ -147,26 +144,46 @@ def prune(itemset,minsup):
     for d in delete:
         del itemset[d]
     return itemset
-              
+
+# Generate Association Rule
+## Association Rule: ["x1 x2 ...","y1 y2 ..."}] indicate {x1,x2,...} -> {y1,y2,...}
+def cal_conf(rule,L):
+    s1 = set(str2numbers(rule[0]))
+    s2 = set(str2numbers(rule[1]))
+    s = s1 | s2
+    print(s)
+    s_list = list(s)
+    s_list.sort()
+    key = list2str(s_list)
+    print(key)
+    print(len(L),len(s)-1,len(s1)-1)
+    num = L[len(s)-1][key]
+    den = L[len(s1)-1][rule[0]]
+    return float(num/den)
+
+
 def apriori(input_data, a):
     global itemset
     generate_itemset(input_data)
     
     minsup = int(a.min_sup*len(itemset.keys()))
-    itemset = {'1':[0,1,2,3],
+    
+    itemset = {'1':[0,3,1,2],
                '2':[1,2,4,5],
                '3':[1,4],
                '4':[0,1,2,3]}
     minsup = 2
     L1 = generate_L1(minsup)
-    for k,v in L1.items():
-        print(k,v)
     Lk = [L1]
     L = L1
     while True:
-        print(len(Lk)+1)
         L = generate_L(L,minsup,len(Lk)+1)
         if len(L) == 0:
             break
         Lk.append(L)
     print(Lk)
+    mincof = 0.05
+    rule1 = ["1","0 2"]
+    print(cal_conf(rule1,Lk))
+    
+    
