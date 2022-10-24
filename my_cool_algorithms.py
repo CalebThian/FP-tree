@@ -6,8 +6,6 @@ def generate_L(L,minsup,k):
     global itemset
     print(f"Generating L{k}")
     Lk = dict()
-    keys = list(L.keys())
-    keys.sort()
     newkeys = apriori_gen(L,minsup)
     #print(f"newkeys:{newkeys}")
     for newkey in newkeys:
@@ -24,6 +22,7 @@ def generate_L(L,minsup,k):
         for c in Ct:
             Lk[c] += 1
     Lk = prune(Lk,minsup)
+    print(Lk)
     return Lk
             
 def sw_inc(sel_win,maximum): #sel_win increment, maximum is the maximum number it can have
@@ -159,9 +158,11 @@ def key2set(s):#Convert key/str to set
             
 def prune(itemset,minsup):
     delete = []
+    T = len(itemset.keys())
     for k,v in itemset.items():
         #print(f"{k}:{v}")
-        if v<minsup:
+        sup = float(v/T)
+        if sup<minsup:
             delete.append(k)
     print(f"Prune {len(delete)} itemset")
     for d in delete:
@@ -204,7 +205,7 @@ def gen_rule(Lk,min_conf):
         for k,v in Lk[i].items():
             # Generate the first layer of rule
             rules = gen_r1(k)
-            print(rules)
+            #print(rules)
             
             #Prune rule less than min_conf
             rules = prune_rule(rules,min_conf,Lk)
@@ -219,10 +220,16 @@ def gen_rule(Lk,min_conf):
                 
                 if len(rules)== 0:
                     break
+    '''                
+    # Print the rules with sup and conf
     for k,rules in enumerate(Rules):
         print(f"Rule with {k+1} element on left")
         for r in rules:
             print(f"{r[0]}->{r[1]}, sup = {cal_sup(r,Lk)},conf = {cal_conf(r,Lk)}")
+    '''
+    # Flatten list
+    Rules = [rule for rules in Rules for rule in rules]
+    #print(f"Total rules:{len(Rules)}")
     return Rules
             
 def gen_r1(k):
@@ -269,13 +276,16 @@ def apriori(input_data, a):
     global itemset
     generate_itemset(input_data)
     
-    minsup = int(a.min_sup*len(itemset.keys()))
-    
+    minsup = a.min_sup
+    min_conf = a.min_conf
+    '''
     itemset = {'1':[0,3,1,2],
                '2':[1,2,5],
                '3':[1,4],
                '4':[0,1,2,3]}
     minsup = 2
+    min_conf = 0.7#a.min_conf
+    '''
     sort_itemset()
     L1 = generate_L1(minsup)
     Lk = [L1]
@@ -287,6 +297,13 @@ def apriori(input_data, a):
             break
         Lk.append(L)
     print(Lk)
-    min_conf = 0.7#a.min_conf
-    gen_rule(Lk,min_conf)
+    
+    Rules = gen_rule(Lk,min_conf)
+    print("In apriori:")
+    for r in Rules:
+        print(f"{r[0]}->{r[1]}, sup = {cal_sup(r,Lk)},conf = {cal_conf(r,Lk)}")
+    
+# FP tree
+
+
     
