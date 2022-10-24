@@ -333,31 +333,41 @@ def fp_growth(input_data,a):
     
 # FP-tree data structure:
 ## Tree: List[Dict]
-## Node: Dict with 3 keys: item:(int);count:(int);fnode:(List[Node])/(Tree)
-## Leaf: Dict with 3 keys: item:(int);count:(int);fnode:null
-def dfs(item,tree):
+## Node: Dict with 4 keys: item:(int);count:(int);prefix = 'x1 x2 x3';fnode:(List[Node])/(Tree)
+## Leaf: Dict with 4 keys: item:(int);count:(int);prefix = 'x1 x2 x3';fnode:null
+
+# Frequency table
+## Table: List[Item]
+## Item: Dict with 2 keys: item:(int);prefix_list: ['x1 x2 x3','y1 y2 y3 ...']
+def dfs(item,tree,prefix):
     if len(item)==0:
         return
     
+    if len(prefix) != 0:
+        next_prefix = prefix+" "+str(item[0])
+    else:
+        next_prefix = str(item[0])
+        
     for node in tree:
         if item[0] == node['item']:
             node['count'] += 1
-            dfs(item[1:],node['fnode'])
+            dfs(item[1:],node['fnode'],next_prefix)
             return
     # Create new node
     Node = {'item':item[0],
             'count':1,
+            'prefix':prefix,
             'fnode':[]
     }
     tree.append(Node)
     
-    dfs(item[1:],tree[-1]['fnode'])
+    dfs(item[1:],tree[-1]['fnode'],next_prefix)
     
 def cons_FP():
     global itemset
     fp = []
     for Id,items in itemset.items():
-        dfs(items,fp)
+        dfs(items,fp,"")
     print(fp)
     
     
