@@ -9,7 +9,7 @@ def generate_L(L,minsup,k):
     keys = list(L.keys())
     keys.sort()
     newkeys = apriori_gen(L,minsup)
-    print(f"newkeys:{newkeys}")
+    #print(f"newkeys:{newkeys}")
     for newkey in newkeys:
         Lk[newkey] = 0
     Ck = list(Lk.keys())
@@ -75,10 +75,10 @@ def apriori_gen(L,minsup):
                 #print(f"B:{B}, Base:{Bs}")
                 if len(Bs) == 0: # For generate L2
                     newkeys.append(newkey)
-                    print(f"newkeys to append {newkey}")
+                    #print(f"newkeys to append {newkey}")
                 elif len(Bs) == 1: # For generate L3
                     checkkey = list2key(list(Bs[0]))
-                    print(f"Checkkey:{checkkey}")
+                    #print(f"Checkkey:{checkkey}")
                     if checkkey in keys:
                         newkeys.append(newkey)
                 else: # For generate Lk>3
@@ -94,10 +94,10 @@ def apriori_gen(L,minsup):
     return newkeys
 
 def list2key(List):
-    print(f"{List} to key: ",end="")
+    #print(f"{List} to key: ",end="")
     List.sort()
     key = list2str(List)
-    print(key)
+    #print(key)
     return key
 
 def list2str(List):
@@ -149,7 +149,7 @@ def set2list(Dict):
 def prune(itemset,minsup):
     delete = []
     for k,v in itemset.items():
-        print(f"{k}:{v}")
+        #print(f"{k}:{v}")
         if v<minsup:
             delete.append(k)
     print(f"Prune {len(delete)} itemset")
@@ -157,6 +157,11 @@ def prune(itemset,minsup):
         del itemset[d]
     return itemset
 
+def sort_itemset():
+    global itemset
+    for k,v in itemset.items():
+        itemset[k].sort()
+        
 # Generate Association Rule
 ## Association Rule: ["x1 x2 ...","y1 y2 ..."}] indicate {x1,x2,...} -> {y1,y2,...}
 def cal_conf(rule,L):
@@ -185,6 +190,7 @@ def apriori(input_data, a):
                '3':[1,4],
                '4':[0,1,2,3]}
     minsup = 2
+    sort_itemset()
     L1 = generate_L1(minsup)
     Lk = [L1]
     L = L1
