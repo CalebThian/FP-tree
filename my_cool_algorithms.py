@@ -405,6 +405,9 @@ def dfs(item,tree,prefix,freq_table):
     dfs(item[1:],tree[-1]['fnode'],next_prefix,freq_table)
     
 def freq_set(fp,table,order,minsup):
+    global itemset
+    T = len(itemset)
+    
     freq_pats = []
     for item in order:
         # Path addition
@@ -417,6 +420,12 @@ def freq_set(fp,table,order,minsup):
     for pat_dict in freq_pats:
         for k,v in pat_dict.items():
             patterns[k]=v
+            
+    # Add L1 by table
+    for item,info in table.items():
+        if float(info['count']/T)>=minsup:
+            patterns[str(item)] = info['count']
+    
     return patterns
 
 def gen_path(item,paths):
