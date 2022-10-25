@@ -57,12 +57,12 @@ def main():
     )
 
     # # TODO: you have to implement this function by yourself
-    #fp_growth_out = my_cool_algorithms.fp_growth(input_data, a)
+    fp_growth_out = my_cool_algorithms.fp_growth(input_data, a)
     # # Write output to file
-    #utils.write_file(
-    #     data=fp_growth_out,
-    #     filename=config.OUT_DIR / f"{filename}-fp_growth.csv"
-    #)
+    utils.write_file(
+         data=fp_growth_out,
+         filename=config.OUT_DIR / f"{filename}-fp_growth.csv"
+    )
 
 if __name__ == "__main__":
     main()
