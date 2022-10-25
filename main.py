@@ -40,7 +40,7 @@ import args
 import my_cool_algorithms
 
 def main():
-    utils.init_kaggle()
+    #utils.init_kaggle()
     
     # Parse command line arguments
     a = args.parse_args()

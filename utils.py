@@ -32,7 +32,7 @@ def init_kaggle():
                     t.append(item[k])
                     data.append(t)
 
-    with open("inputs\\basket_analysis.txt", 'w',newline='') as f:
+    with open("inputs\\kaggle.txt", 'w',newline='') as f:
         for d in data:
             s = str(d[0])+" "+str(d[1])+" "+str(d[2])+"\n"
             f.write(s)
