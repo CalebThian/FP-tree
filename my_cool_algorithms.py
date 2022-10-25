@@ -319,9 +319,9 @@ def apriori(input_data, a):
 def fp_growth(input_data,a):
     global itemset
     generate_itemset(input_data)
-    minsup = a.min_sup
+    minsup = a.min_sup*len(itemset) # Because min_sup acting weird, change to int 
     min_conf = a.min_conf
-    
+    '''
     itemset = {'1':[0,1,2],
                '2':[0,3],
                '3':[0,4],
@@ -333,21 +333,31 @@ def fp_growth(input_data,a):
                '9':[0,1,4]}
     minsup = 2./9.-0.001
     min_conf = 0.7#a.min_conf
+    '''
     sort_itemset()
     
     # Construct FP-Tree with L1
-    fp,freq_table = cons_FP(minsup)
+    print("Constructing Fp")
+    fp,freq_table = cons_FP()
+    print("Finish construction")
     
-    # Find the order of obect
+    # Find the order of item
+    print("Finding the order of item")
     order_key = get_order(freq_table)
+    print("Finish order_key creation")
     
     # Find frequent set
+    print("Finding frequent set")
     patterns = freq_set(fp,freq_table,order_key,minsup)
+    print("Finish")
     
+    print("Separating patterns")
     Lk = pat_separation(patterns)
     print(Lk)
+    print("Finish separation")
     
     # Generate rule
+    print("Generating rules")
     Rules = gen_rule(Lk,min_conf)
     rule_data = []
     print("In FP-tree:")
@@ -374,14 +384,14 @@ def pat_separation(patterns): # Separate patterns found into L1,L2,L3,...
     return Lk
     
     
-def cons_FP(minsup):
+def cons_FP():
     global itemset
     fp = []
     freq_table = dict()
     for Id,items in itemset.items():
         dfs(items,fp,"",freq_table)
-    print(fp)
-    print(freq_table)
+    #print(fp)
+    #print(freq_table)
     return fp,freq_table
     
 def get_order(freq_table):
@@ -403,7 +413,6 @@ def get_order(freq_table):
 def dfs(item,tree,prefix,freq_table):
     if len(item)==0:
         return
-    
     if len(prefix) != 0:
         next_prefix = prefix+" "+str(item[0])
     else:
@@ -412,8 +421,8 @@ def dfs(item,tree,prefix,freq_table):
     for node in tree:
         if item[0] == node['item']:
             node['count'] += 1
-            dfs(item[1:],node['fnode'],next_prefix,freq_table)
             freq_table[item[0]]['count'] += 1
+            dfs(item[1:],node['fnode'],next_prefix,freq_table)
             return
     # Create new node
     Node = {'item':item[0],
@@ -452,7 +461,7 @@ def freq_set(fp,table,order,minsup):
             
     # Add L1 by table
     for item,info in table.items():
-        if float(info['count']/T)>=minsup:
+        if info['count']>=minsup:
             patterns[str(item)] = info['count']
     
     return patterns
@@ -475,24 +484,45 @@ def path_addition(item,paths,fp,minsup):
         p_num = str2numbers(p)
         p_num.append(item)
         path[p] = get_count_path(p_num,fp)
-    print(item,path)
     
+    total = 0
+    for p,count in path.items():
+        total+=count
+    print(f"{item}: Before addition have:{len(path.keys())}, total path = {total}")
     # Add path counting from its subset
     ## Sort the paths from longest to shortest
     p_set = list(map(str2numbers,paths))
     p_set = sorted(p_set,key=len,reverse=True)
 
+    path_to_prune = []
+    new_path_count = path.copy()
     for i in range(len(p_set)):
         for j in range(i+1,len(p_set)):
             p1 = list2str(p_set[i])
             p2 = list2str(p_set[j])
             if p2 in p1: #p2 is a sub-path of p1
-                path[p2] += path[p1]
+                new_path_count[p2] += path[p1]
+                '''
                 # If longer path will be pruned, perform addition once, else perform on all
-                if float(path[p1]/T)<minsup:
+                if path[p1]<minsup:
+                    # To accelerate, prune some paths here first
+                    path_to_prune.append(p1)
                     break
+                '''
+    path = new_path_count.copy()
     # Prune path
+    total = 0
+    for p,count in path.items():
+        total+=count
+    print(f"{item}: Before prune have:{len(path.keys())}, total path = {total}")
+    
+    for p in path_to_prune:
+        path.pop(p,None)
     path = prune_path(path,minsup)
+    total = 0
+    for p,count in path.items():
+        total+=count
+    #print(f"{item}: After prune left:{len(path.keys())}, total path = {total}")
     
     # Generate sub-path
     cur_path = path.keys()
@@ -502,7 +532,7 @@ def path_addition(item,paths,fp,minsup):
         for subpath in subpaths:
             if subpath not in cur_path:
                 Subpaths[subpath] = count
-                print(f"{p} generates {subpath}")
+                #print(f"{p} generates {subpath}")
     for subpath,count in Subpaths.items():
         path[subpath] = count
     return path
@@ -545,14 +575,13 @@ def prune_path(path,minsup):
     T = len(itemset)
     del_list = []
     for p,v in path.items():
-        sup = float(v/T)
-        if sup<minsup:
+        if v<minsup:
             del_list.append(p)
         elif len(p)==0:
             del_list.append(p)
-    print(f"Prune {len(del_list)} paths")
+    #print(f"Prune {len(del_list)} paths")
     for d in del_list:
-        del path[d]
+        path.pop(d,None)
     return path
             
 def get_count_path(p_num,fp):

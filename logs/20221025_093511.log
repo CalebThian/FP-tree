@@ -1,0 +1,1 @@
+2022-10-25 09:35:11,588 [main.py:45] INFO: Arguments: Namespace(dataset='2022-DM-release-testdata-2.txt', min_conf=0.1, min_sup=0.1)
