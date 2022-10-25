@@ -40,13 +40,16 @@ import args
 import my_cool_algorithms
 
 def main():
+    utils.init_kaggle()
+    
     # Parse command line arguments
     a = args.parse_args()
     l.info(f"Arguments: {a}")
     
     # Load dataset, the below io handles ibm dataset
-    input_data: List[List[str]] = utils.read_file(config.IN_DIR / a.dataset)
     filename = Path(a.dataset).stem
+    input_data: List[List[str]] = utils.read_file(config.IN_DIR / a.dataset)
+    
     
     # # TODO: you have to implement this function by yourself
     apriori_out = my_cool_algorithms.apriori(input_data, a)

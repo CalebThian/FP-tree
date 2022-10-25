@@ -477,7 +477,7 @@ def gen_path(item,paths):
 def path_addition(item,paths,fp,minsup):
     global itemset
     T = len(itemset)
-    print(f"Path addition on item {item}, total paths = {len(paths)}")
+    print(f"Path addition on item {item}")
     path = dict()
     for p in paths:
         #print(f"Working on {p}")
@@ -485,9 +485,9 @@ def path_addition(item,paths,fp,minsup):
         p_num.append(item)
         path[p] = get_count_path(p_num,fp)
     
-    total = 0
-    for p,count in path.items():
-        total+=count
+    #total = 0
+    #for p,count in path.items():
+    #    total+=count
     #print(f"{item}: Before addition have:{len(path.keys())}, total path = {total}")
     
     # Add path counting from its subset
@@ -506,15 +506,15 @@ def path_addition(item,paths,fp,minsup):
 
     path = new_path_count.copy()
     # Prune path
-    total = 0
-    for p,count in path.items():
-        total+=count
+    #total = 0
+    #for p,count in path.items():
+    #    total+=count
     #print(f"{item}: Before prune have:{len(path.keys())}, total path = {total}")
 
     path = prune_path(path,minsup)
-    total = 0
-    for p,count in path.items():
-        total+=count
+    #total = 0
+    #for p,count in path.items():
+    #    total+=count
     #print(f"{item}: After prune left:{len(path.keys())}, total path = {total}")
     
     # Generate sub-path
@@ -584,7 +584,7 @@ def get_count_path(p_num,fp):
             break
     i = 1
     while True:
-        if i>=len(p_num):
+        if i == len(p_num):
             return tree['count']
         for node in tree['fnode']:
             if node['item'] == p_num[i]:

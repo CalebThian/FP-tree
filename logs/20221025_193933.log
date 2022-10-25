@@ -1,0 +1,1 @@
+2022-10-25 19:39:33,043 [main.py:47] INFO: Arguments: Namespace(dataset='basket_analysis.txt', min_conf=0.5, min_sup=0.1)
