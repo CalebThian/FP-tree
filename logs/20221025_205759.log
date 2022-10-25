@@ -1,0 +1,1 @@
+2022-10-25 20:57:59,479 [main.py:47] INFO: Arguments: Namespace(dataset='data.txt', min_conf=0.5, min_sup=0.0025)

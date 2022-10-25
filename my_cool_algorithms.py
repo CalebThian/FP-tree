@@ -334,8 +334,8 @@ def fp_growth(input_data,a):
     print("Finding the order of item")
     freq_table = get_order(freq_table)
     print("Finish order_key creation")
-    for k,v in freq_table.items():
-        print(f"{k}:{v['count']}")
+    #for k,v in freq_table.items():
+    #    print(f"{k}:{v['count']}")
         
     # Rebuild FP-tree to ascending order
     sort_itemset(resort = True,freq_table = freq_table)
@@ -477,7 +477,7 @@ def gen_path(item,paths):
 def path_addition(item,paths,fp,minsup):
     global itemset
     T = len(itemset)
-    print(f"Path addition on item {item}")
+    #print(f"Path addition on item {item}")
     path = dict()
     for p in paths:
         #print(f"Working on {p}")
