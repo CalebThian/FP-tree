@@ -345,6 +345,21 @@ def fp_growth(input_data,a):
     patterns = freq_set(fp,freq_table,order_key,minsup)
     print(patterns)
     
+    Lk = pat_separation(patterns)
+    print(Lk)
+
+def pat_separation(patterns): # Separate patterns found into L1,L2,L3,...
+    Lk = []
+    for pat,count in patterns.items():
+        while True:
+            if len(str2numbers(pat))>len(Lk):
+                Lk.append(dict())
+            else:
+                Lk[len(str2numbers(pat))-1][pat] = count
+                break
+    return Lk
+    
+    
 def cons_FP(minsup):
     global itemset
     fp = []
